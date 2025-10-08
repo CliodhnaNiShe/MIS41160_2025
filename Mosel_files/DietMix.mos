@@ -1,0 +1,25 @@
+
+model "Diet Mix"
+ uses "mmxprs"                       ! We shall use Xpress-Optimizer
+
+ declarations
+  x1,x2,x3,x4: mpvar                 ! Decision variables: produced quantities
+ end-declarations
+
+ Cost:=  0.22*x1 + 0.12*x2 + 0.16*x3 + 0.07*x4        ! Objective function
+ Calories:=   110*x1 + 90*x2 + 100*x3 + 65*x4 >= 420
+ Iron:=   12*x1 + 0*x2 + 0*x3 + 1*x4 >= 5
+ Calcium:=   8*x1 + 270*x2 + 250*x3 + 26*x4 >= 400
+ Fibre:=   0*x1 + 5*x2 + 0*x3 + 2*x4 >= 12
+
+ minimise(Cost)                    ! Solve the problem
+
+ writeln( getsol(x1), " Dry cereal")
+ writeln( getsol(x2), " Oat bran")
+ writeln( getsol(x3), " Milk")
+ writeln( getsol(x4), " Toast")
+ writeln("Best profit is ", getobjval)
+
+
+end-model
+
