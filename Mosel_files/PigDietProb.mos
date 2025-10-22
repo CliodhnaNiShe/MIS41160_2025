@@ -1,1 +1,69 @@
+model pigDietProblem
+  uses "mmxprs"
 
+  declarations
+    corn_price: real
+    barley_price: real
+    hay_price: real
+
+    corn_carbohydrate_quanitity: real
+    corn_protein_quantity: real
+    corn_vitamin_quanity: real
+    barley_carbohydrate_quanitity: real
+    barley_protein_quantity: real
+    barley_vitamin_quantity: real
+    hay_carbohydrate_quantity: real
+    hay_protein_quantity: real
+    hay_vitamin_quantity: real
+
+    carbohydrate_requirement: real
+    protein_requirement: real
+    vitamin_requirement: real
+
+    x_corn: mpvar ! Declare the corn variable
+    x_barley: mpvar ! Declare the barley variable
+    x_hay: mpvar ! Declare the hay variable
+
+    feed_cost: linctr ! Declare the feed cost (obejctive) linear combination
+    carbohydrate_quantity: linctr ! Declare the carbohydrate constraint
+    protein_quantity: linctr ! Declare the protein constraint
+    vitamin_quantity: linctr ! Declare the vitamin constraint
+  end-declarations
+
+  corn_price := 0.84 ! Assign value
+  barley_price := 0.72 ! Assign value
+  hay_price := 0.82 ! Assign value
+
+  corn_carbohydrate_quantity := 90 ! Assign value
+  corn_protein_quantity := 30 ! Assign value
+  corn_vitamin_quantity := 10 ! Assign value
+  barley_carbohydrate_quantity := 20 ! Assign value
+  barley_protein_quantity := 80 ! Assign value
+  barley_vitamin_quanity := 20 ! Assign value
+  hay_carbohydrate_quantity := 40 ! Assign value
+  hay_protein_quantity := 60 ! Assign value
+  hay_vitamin_quantity := 60 ! Assign value
+
+  carbohydrate_requirement := 200 ! Assign value
+  protein_requirement := 180 ! Assign value
+  vitamin_requirement := 150 ! Assign value
+
+  feed_cost := corn_price * x_corn + barley_price * x_barley + hay_price * x_hay ! Objective function
+
+  carbohydrate_quantity := x_corn * corn_carbohydrate_quantity + x_barley * barley_carbohydrate_quantity + x_hay * hay_carbohydrate_quantity ! Sum of carbohydrate quantities
+  protein_quantity := x_corn * corn_protein_quantity + x_barley * barley_protein_quantity + x_hay * hay_protein_quantity ! Sum of protein quantities
+  vitamin_quantity := x_corn * corn_vitamin_quantity + x_barley * barley_vitamin_quantity + x_hay * hay_vitamin_quantity ! Sum of vitamin quantities
+
+  carbohydrate_quantity >= carbohydrate_requirement ! Create carbohydrate constraint
+  protein_quantity >= protein_requirement ! Create protein constraint
+  vitamin_quantity >= vitamin_requirement ! Create vitamin constraint
+
+  minimise(feed_cost) ! Solve the problem, minimising the feed cost
+
+  writeln("Optimal feed cost: ", getobjval)
+  writeln("Corn quantity: ", getsol(x_corn))
+  writeln("Barley quantity: ", getsol(x_barley))
+  writeln("Hay quantity: ", getsol(x_hay))
+
+  writeln("End running model")
+end-model
