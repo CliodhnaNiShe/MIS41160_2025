@@ -1,0 +1,66 @@
+
+model team
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+!procedure to check problem status
+procedure print_status
+	declarations
+		status: string
+	end-declarations
+	case getprobstat of
+		XPRS_OPT: status:="Optimum found"
+		XPRS_UNF: status:="Unfinished"
+		XPRS_INF: status:="Infeasible"
+		XPRS_UNB: status:="Unbounded"
+		XPRS_OTH: status:="Failed"
+		else status:="???"
+	end-case
+	writeln("Problem status: ", status)
+end-procedure
+
+!sample declarations section
+declarations
+	!Notice that these are sets not arrays
+	team = {"a","b","c","d","e","f","g","h","i","j"}
+	female = {"a","b","c","d","e"}
+	male = {"f","g","h","i","j"}
+	stu = {"a","b","c","j"}
+	academ = {"d","g","h","i"}
+	admin = {"e","f"}
+x: array(team) of mpvar
+end-declarations
+
+
+!obj
+z:= sum( i in team ) x(i)
+
+!at least 1 female
+F:= sum (i in female) x(i) >= 1
+!at least 1 male
+M:= sum (i in male) x(i) >= 1
+!at least 1 student
+S:= sum (i in stu) x(i) >= 1
+!at least 1 academ
+AM:= sum (i in academ) x(i) >= 1
+!at least 1 academ
+AD:= sum (i in admin) x(i) >= 1
+
+!Try commenting out the next two lines and see what happens
+forall (i in team)
+	x(i) is_binary
+
+minimize(z)
+print_status
+writeln("Best min is ", getobjval)
+writeln("Team members are; ")
+forall (i in team)
+	if getsol(x(i)) = 1 then
+		writeln(i," ")
+	end-if
+	
+!Let's write the problem to the output window	
+writeln("")
+exportprob(EP_MIN,"",z)
+
+!This problem is an example where multiple optimal solutions exist
+end-model
