@@ -1,0 +1,139 @@
+(!******************************************************
+   PV_Location.mos
+   Author: Paula Carroll
+   PV Facility location model
+   
+   Test using UCD Belfield campus
+   
+These data files are averages from the Building Energy Management System
+
+   *******************************************************!)
+model PVFLP
+uses "mmxprs"; !gain access to the Xpress-Optimizer solver
+
+declarations
+	!Sets - index by b,s, and e
+	!NumBuilding = 1
+	!B = 1..NumBuilding
+	B: set of string
+	NumSys = 4
+	S = 1..NumSys
+	NumEdge = 81
+	E = 1..NumEdge !Min Span Tree connecting all buildings
+	
+	!Parameters
+	SOLAR_YIELD = 0.15 !kW/m²
+	PANEL_EFFICIENCY = 0.4 !conversion factor from historical data
+	
+	k: array(S) of real ![kW]: Nominal capacity of PV system type s
+	c: array(S) of real ! [€/kW]: Unit installation cost of PV system type s
+	K_bar: array(B) of real ![kW]: Maximum PV capacity available at building b
+	D: array(B) of real ![kWh]: Electricity demand of building b
+	Budget = 400000![€]: Total budget available for PV installations
+	alpha = 0.013!: Minimum fraction of total community demand to be covered by local PV generation
+	beta = 0.1025!PV utilisation factor
+	P =  2000 ![€/kWh]: Penalty cost for unmet demand
+	
+	!The UCD test instance
+	Building_Id_name: array(B) of string
+	x_lat, y_lat, RoofArea, Demand, Max, Median, Noon: array (B) of real
+	MST_UCD: dynamic array(B,B) of real  
+	
+	!Decision variables and constraints
+	x: array(B,S) of mpvar ! assign system type s to building b
+	g: array (B) of mpvar	![kW]: PV capacity installed on building b
+	f: dynamic array (B,B) of mpvar ![kWh]: Energy flow fro  building i to buildng j
+	u: array (B) of mpvar ![kWh]: Unmet electricity demand at building b
+	
+end-declarations
+
+!set parameter values
+k :: [50, 60, 70, 100]
+c :: [700, 750, 800, 1000 ]
+
+!or read data from file
+ initializations from 'UCD.txt'
+	[x_lat, y_lat, RoofArea, Demand, Max, Median, Noon] as  'UCD_test'
+	MST_UCD as 'UCD_MST'
+ end-initializations
+ 
+!a handy procedure to check results
+procedure print_status
+declarations
+status: string
+end-declarations
+case getprobstat of
+XPRS_OPT: status:="Optimum found"
+XPRS_UNF: status:="Unfinished"
+XPRS_INF: status:="Infeasible"
+XPRS_UNB: status:="Unbounded"
+XPRS_OTH: status:="Failed"
+else status:="???"
+end-case
+writeln("Problem status: ", status)
+end-procedure
+
+procedure print_solution
+	writeln("The objective function value is: ",getobjval)
+	writeln("Solution recommendations:")
+	forall (b in B, s in S) 
+		if (getsol(x(b,s)) >0 ) then 
+			writeln("Install system ",s," on building ", b)
+			writeln("")
+		end-if
+end-procedure
+ 
+ 
+!Do some preprocessing
+!Estimate the kW availability per buiilding
+forall (b in B) K_bar(b) := SOLAR_YIELD * PANEL_EFFICIENCY * RoofArea(b)
+
+!we need to finalise which edges are in the MST !)
+forall (i in B, j in B | exists(MST_UCD(i,j)) ) create(f(i,j))
+
+
+!Create the MILP model
+!Objective function Eq5 INOC
+Z:= sum (b in B, s in S) c(s)*k(s)*x(b,s) +
+	sum (b in B) P*u(b) 
+
+!Constraints
+!Eq6 INOC At most one system s per building
+forall (b in B) sum(s in S) x(b,s) <= 1
+
+
+!Eq7 PV generation at building b based on installed capacity
+forall (b in B) g(b)= sum(s in S) k(s)*x(b,s)
+
+!EQ8 INOC limited roofspace for PV use 
+forall (b in B) g(b) <= K_bar(b)
+
+!Eq9 Capital budget constraint
+sum(b in B, s in S) c(s)*k(s)*x(b,s) <= Budget
+
+!Eq10 Power balance: generation + inflow +bought = demand plus outflow
+forall (b in B) 
+	beta*g(b) + sum(i in B |i<>b) f(i,b) + u(b) = 
+	Demand(b) + sum(j in B |j<>b) f(b,j)
+
+!Eq11 ensure threshold of demand in policy is served
+sum(b in B) beta*g(b) >= sum(b in B) alpha*Demand(b)
+
+!Binary constraints
+forall (b in B, s in S) x(b,s) is_binary
+(!Note the default is that variables are real nonnegative variables, 
+so we don't need to specify g_b!)
+
+
+!Write the MILP model to screen or to a file by inserting a name between " "
+!It's handy for debugging small instances
+!exportprob(EP_MIN,"",Z)
+
+
+!Solve the model and check the results
+minimise(Z)
+print_status
+print_solution
+
+
+end-model
