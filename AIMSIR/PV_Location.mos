@@ -22,17 +22,17 @@ declarations
 	E = 1..NumEdge !Min Span Tree connecting all buildings
 	
 	!Parameters
-	SOLAR_YIELD = 0.15 !kW/m²
+	SOLAR_YIELD = 0.15 !kW/mÂ²
 	PANEL_EFFICIENCY = 0.4 !conversion factor from historical data
 	
 	k: array(S) of real ![kW]: Nominal capacity of PV system type s
-	c: array(S) of real ! [€/kW]: Unit installation cost of PV system type s
+	c: array(S) of real ! [â‚¬/kW]: Unit installation cost of PV system type s
 	K_bar: array(B) of real ![kW]: Maximum PV capacity available at building b
 	D: array(B) of real ![kWh]: Electricity demand of building b
-	Budget = 400000![€]: Total budget available for PV installations
+	Budget = 400000![â‚¬]: Total budget available for PV installations
 	alpha = 0.013!: Minimum fraction of total community demand to be covered by local PV generation
 	beta = 0.1025!PV utilisation factor
-	P =  2000 ![€/kWh]: Penalty cost for unmet demand
+	P =  2000 ![â‚¬/kWh]: Penalty cost for unmet demand
 	
 	!The UCD test instance
 	Building_Id_name: array(B) of string
