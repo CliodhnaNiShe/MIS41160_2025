@@ -11,7 +11,7 @@ import math
 
 
 
-xp.init('C:/xpressmp/bin/xpauth.xpr')
+# xp.init('C:/xpressmp/bin/xpauth.xpr')
 
 fact = 0.1025  # PV utilisation factor
 # fact=0.88
