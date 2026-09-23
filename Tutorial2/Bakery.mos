@@ -1,0 +1,17 @@
+model "Bakery"
+  uses "mmxprs"
+  
+  declarations
+  x, y: mpvar
+  Profit: linctr
+  end-declarations
+  
+  Profit := 30*x + 25*y
+  2*x + y <= 40  !Flour constraint
+  x + 2*y <= 50 !Prep time constraint
+  
+  maximize(Profit)
+  
+  writeln("scones = ", getsol(x), ", muffins = ", getsol(y),
+  ", Profit = ", getobjval)
+end-model
