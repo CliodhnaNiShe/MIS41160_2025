@@ -141,7 +141,7 @@ def build_and_solve_model(buildings, building_data, edges, edge_data):
     unmet = {
         b: xp.var(
             lb=0,
-            ub=building_data[b]["demand"],
+            # ub=building_data[b]["demand"],
             vartype=xp.continuous,
             name=f"UnmetDemand_{b}"
         )
