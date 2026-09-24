@@ -1,0 +1,17 @@
+model "Investment"
+  uses "mmxprs"
+
+  declarations
+  x, y: mpvar
+  Return: linctr
+  end-declarations
+
+  Return := 0.145*x + 0.053*y
+  4.1*x + 0.9*y <= 5000 !risk
+  x + y <= 4000   !budget
+
+  maximize(Return)
+
+  writeln("crypto = ", getsol(x), ", bonds = ", getsol(y),
+  ", return = ", getobjval)
+end-model
