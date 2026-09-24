@@ -1,0 +1,24 @@
+model "Incineration"
+  uses "mmxprs"
+
+  declarations
+  x, y: mpvar
+  Cost: linctr
+  end-declarations
+
+  Cost := 4500*x + 6000*y + 14000*(1000-x-y)
+
+  2*x + y <= 350 !hydrocarbons
+  6*x + 2*y <= 900 ! particulates
+
+  x <= 200 ! Stacks capacity
+  y <= 400 ! new-incinerator capacity
+
+  x + y <= 1000 ! available waste
+
+  minimize(Cost)
+
+  writeln("Stacks = ", getsol(x), ", new plant = ", getsol(y),
+  ", cost = ", getobjval)
+
+end-model
