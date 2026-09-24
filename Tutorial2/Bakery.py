@@ -7,8 +7,8 @@ muffins = xp.var(name="muffins", lb=0, vartype=xp.continuous)
 
 Profit = 30*scones + 25*muffins
 
-prep_time = 2*scones + muffins <= 40
-flour = scones + 2*muffins <= 50
+flour = 2*scones + muffins <= 40
+prep_time = scones + 2*muffins <= 50
 
 problem.addVariable(scones, muffins)
 problem.addConstraint(prep_time)
