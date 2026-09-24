@@ -1,0 +1,18 @@
+model "Advertising"
+  uses "mmxprs"
+
+  declarations
+  x, y: mpvar
+  Enquiries: linctr
+  end-declarations
+
+  Enquiries := 40*x + 30*y
+  300*x + 200*y <= 1800
+  x + 2*y <= 12
+
+  maximize(Enquiries)
+
+  writeln("search = ", getsol(x), ", social = ", getsol(y),
+  ", enquiries = ", getobjval)
+
+end-model
